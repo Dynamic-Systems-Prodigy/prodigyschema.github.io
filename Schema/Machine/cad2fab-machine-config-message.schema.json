@@ -5,12 +5,12 @@
   "type": "object",
   "properties": {
     "header": {
-      "$ref": "cad2fab-message-header.schema.json"
+      "$ref": "../cad2fab-message-header.schema.json"
     },
     "machineConfig": {
       "type": "object",
       "$ref": "cad2fab-machine-config.schema.json"
     }
-  },  
+  },
   "required": ["header", "machineConfig"]
 }
