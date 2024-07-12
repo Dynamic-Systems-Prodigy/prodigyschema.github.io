@@ -1,0 +1,520 @@
+{
+  "$id": "https://thinkbrave.com/cad2fab/schemas/v1/cad2fab-product-config.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "CAD2FAB Product Config",
+  "type": "object",
+  "description": "",
+  "properties": {
+    "assemblyId": {
+      "type": "string",
+      "description": "Indicates what machine this is for",
+      "maxLength": 5
+    },
+    "description": {
+      "type": "string",
+      "description": "Describes the equipment and its purpose",
+      "maxLength": 64
+    },
+    "designDate": {
+      "type": "string",
+      "description": "In ISO 8601 format"
+    },
+    "product": {
+      "type": "object",
+      "$ref": "#/definitions/Product"
+    },
+    "sequences": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/StationSequence" }
+    },
+    "files": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/File" }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["assemblyId"],
+  
+  "definitions": {
+    "Product": {
+      "type": "object",
+      "properties": {
+        "origins": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/OriginObject" }
+        },
+        "boundaries": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Boundary" }
+        },
+        "partId": {
+          "type": "string",
+          "description": "",
+          "maxLength": 5
+        },
+        "description": {
+          "type": "string",
+          "description": "",
+          "maxLength": 64
+        },
+        "userFrame": {
+          "type": "string",
+          "description": "Position and rotation of the cordinate system relating back to World Cordinates of the equipment",
+          "maxLength": 48,
+          "example": "\"{x,y,z,q1,q2,q3,q4}\", \"{x,y,z,xx,xy,xz,yx,yy,yz,zx,zy,zz}\""
+        },
+        "linearUnits": {
+          "type": "string",
+          "description": "",
+          "maxLength": 4,
+          "enum": ["mm", "m", "in"]
+        },
+        "rotationUnits": {
+          "type": "string",
+          "description": "",
+          "maxLength": 4,
+          "enum": ["rad", "deg"]
+        },
+        "massUnits": {
+          "type": "string",
+          "description": "Mass vs weight based system",
+          "maxLength": 4,
+          "enum": ["kg", "lbs"]
+        },
+        "subParts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SubPart" }
+        },
+        "features": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Feature" }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "partId",
+        "description",
+        "userFrame",
+        "linearUnits",
+        "rotationUnits",
+        "massUnits"
+      ]
+    },
+
+    "LinkedAsset": {
+      "type": "object",
+      "properties": {
+        "assetId": {
+          "type": "string",
+          "description": "assetId within the machine config to be linked",
+          "maxLength": 8
+        },
+        "compId": {
+          "type": "string",
+          "description": "componentId of the assetId being linked",
+          "maxLength": 8
+        },
+        "subCompId": {
+          "type": "string",
+          "description": "subComponentId of the componentId being linked",
+          "maxLength": 8
+        },
+        "opCode": {
+          "type": "integer",
+          "description": "Operation code of what the equipment will do",
+          "examples": ["401"]
+        },
+        "opData": {
+          "type": "array",
+          "description": "Operational data",
+          "items": { "$ref": "#/definitions/OpDataParameter" }
+        },
+        
+        "data": { "$ref": "#/definitions/SubPartData" }
+      },
+      "additionalProperties": false,
+      "required": ["assetId", "compId"]
+    },
+
+    "SubPart": {
+      "type": "object",
+      "properties": {
+        "partId": {
+          "type": "string",
+          "description": "",
+          "maxLength": 5
+        },
+        "typeId": {
+          "type": "string",
+          "description": "",
+          "maxLength": 32
+        },
+        "description": {
+          "type": "string",
+          "description": "",
+          "maxLength": 64
+        },
+        "data": { "$ref": "#/definitions/SubPartData" }
+      },
+      "additionalProperties": false,
+      "required": ["partId", "typeId"]
+    },
+
+    "SubPartData": {
+      "type": "object",
+      "properties": {
+        "mass": {
+          "type": "number"
+        },
+        "origin": {
+          "$ref": "#/definitions/Origin",
+          "description": "Point on the part which relates back to the Defined User Frame"
+        },
+        "rotation": {
+          "$ref": "#/definitions/Rotation",
+          "description": "Rotation about the Origin relative to the orientation of the Defined User Frame"
+        },
+        "cOfG": {
+          "$ref": "#/definitions/CofG",
+          "description": "Center of Gavity on the part which relates back to the Defined User Frame"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "OriginObject": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the origin to be used as a reference ID"
+        },
+        "description": {
+          "type": "string",
+          "description": "User-defined description for the origin object"
+        },
+        "o": {
+          "type": "array",
+          "description": "Origin position in [x,y,z]",
+          "items": { 
+            "type": "number"
+          }
+        },
+        "z": {
+          "type": "array",
+          "description": "Z-axis in [x,y,z]",
+          "items": { 
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["x", "y", "z"]
+    },
+
+    "Boundary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID of the boundary"
+        },
+        "objectId": {
+          "type": "string",
+          "description": "ID of the Rhino object of this boundary"
+        },
+        "name": {
+          "type": "string",
+          "description": "User-defined name for the boundary object"
+        },
+        "description": {
+          "type": "string",
+          "description": "User-defined description for the boundary object"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["id", "name"]
+    },
+
+    "Origin": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["x", "y", "z"]
+    },
+
+    "Point": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["x", "y", "z"]
+    },
+
+    "Rotation": {
+      "type": "object",
+      "properties": {
+        "q1": {
+          "type": "number"
+        },
+        "q2": {
+          "type": "number"
+        },
+        "q3": {
+          "type": "number"
+        },
+        "q4": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["q1", "q2", "q3", "q4"]
+    },
+
+    "CofG": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        },
+        "z": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["x", "y", "z"]
+    },
+
+    "Feature": {
+      "type": "object",
+      "properties": {
+        "featureTypeId": {
+          "type": "string",
+          "description": ""
+        },
+        "referenceId": {
+          "type": "string",
+          "description": ""
+        },
+        "description": {
+          "type": "string",
+          "description": ""
+        },
+        "points": { "$ref": "#/definitions/FeaturePointsData" },
+        "targets": { "$ref": "#/definitions/FramePoints" },
+        "linkedAssets" : { 
+          "type": "array",
+          "description": "Assets linked or used by this feature instance",
+          "items": { "$ref": "#/definitions/LinkedAsset" }
+        },
+        "originId": {
+          "type": "string",
+          "description": "Reference to an origin ID from which to reference points"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["featureType", "referenceId"]
+    },
+
+    "FramePoints": {
+      "type": "object",
+      "properties": {
+        "refFrame": {
+          "type": "string",
+          "description": "",
+          "maxLength": 48,
+          "example": "\"{x,y,z,q1,q2,q3,q4}\", \"{x,y,z,xx,xy,xz,yx,yy,yz,zx,zy,zz}\""
+        },
+        "data": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Point" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["refFrame", "data"]
+    },
+
+    "FeaturePointsData": {
+      "type": "object",
+      "properties": {
+        "refFrame": {
+          "type": "string",
+          "description": "",
+          "maxLength": 48,
+          "example": "\"{x,y,z,q1,q2,q3,q4}\", \"{x,y,z,xx,xy,xz,yx,yy,yz,zx,zy,zz}\""
+        },
+        "data": {
+          "type": "array",
+          "items": { 
+            "type": "object",
+            "properties": {
+              "master": {
+                "type": "number",
+                "description": ""
+              },
+              "x": {
+                "type": "number",
+                "description": ""
+              },
+              "y": {
+                "type": "number",
+                "description": ""
+              },
+              "z": {
+                "type": "number",
+                "description": ""
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "StationSequence": {
+      "type": "object",
+      "properties": {
+        "stationId": {
+          "type": "string",
+          "description": "5 character length ID that relates to what station should be completing this work",
+          "maxLength": 5
+        },
+        "transactions": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/Transaction" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["refFrame", "data"]
+    },
+
+    "Transaction": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of step",
+          "examples": ["endmill milling", "fixture adjustment", "raise lifters"]
+        },
+        "description": {
+          "type": "string",
+          "description": "Friendly description of the transaction"
+        },
+        "transactionId": {
+          "type": "number",
+          "description": "Unique for the sequence, consisting of opcode and physical position of work, e.g. 401.1",
+          "examples": ["401.1"]
+        },
+        "opCode": {
+          "type": "integer",
+          "description": "Operation code of what the equipment will do",
+          "examples": ["401"]
+        },
+        "opData": {
+          "type": "array",
+          "description": "An array of feature parameters relative to that operation reference: machine config assets.components.subcomponents.parameters (for example: Tool Example: {\"rpm\": 2500, \"feedrate\":39.5, \"diameter\":0.5}",
+          "items": { "$ref": "#/definitions/OpDataParameter" }
+        },
+        "preOps": {
+          "type": "array",
+          "description": "A list of op codes that must come prior to this steps execution",
+          "items": {
+            "type": "number"
+           }
+        },
+        "preTransactions": {
+          "type": "array",
+          "description": "A list of step IDs that will be executed prior to executing this operation",
+          "items": { "$ref": "#/definitions/Step" },
+          "examples": ["300.38"]
+        },
+        "postTransactions": {
+          "type": "array",
+          "description": "A list of step IDs that will be executed post to executing this operation",
+          "items": { "$ref": "#/definitions/Step" },
+          "examples": ["420.18"]
+        },
+        "relPosition": {
+          "type": "array",
+          "description": "The [x,y,z] position of a datum point of the feature",
+          "items": { "type": "number" },
+          "examples": ["[38, 75, 2]"]
+        },
+        "referenceId": {
+          "type": "string",
+          "description": "The name / ID of the feature"
+        },
+        "partId": {
+          "type": "string",
+          "description": "The id of the part where operation will be occuring"
+        }
+      },
+      "additionalProperties": false,
+      "required": []
+    },
+
+    "OpDataParameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "A legible name to define a parameter \"Key\""
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the parameter defined as a string \"Value\""
+        },
+        "group": {
+          "type": "string",
+          "description": "String used for grouping parameters together in a UI or set.  Parameters with the same group value are grouped together."
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "value"]
+    },
+
+    "Step": {
+      "type": "number",
+      "description": "A transaction Id",
+      "additionalProperties": false
+    },
+
+    "File": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Name of the file",
+          "maxLength": 32
+        },
+        "location": {
+          "type": "string",
+          "description": "Robotic / CNC Program Files",
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,516 @@
+{
+  "$id": "https://thinkbrave.com/cad2fab/schemas/v1/cad2fab-machine-config.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "CAD2FAB_Machine_Config",
+  "type": "object",
+  "description": "The Machine Config Object is the definition of the equipment",
+  "properties": {
+    "machineId": {
+      "type": "string",
+      "description": "Indicates what machine this is for",
+      "maxLength": 5
+    },
+    "description": {
+      "type": "string",
+      "description": "Describes the equipment and its purpose",
+      "maxLength": 64
+    },
+    "installDate": {
+      "type": "string",
+      "description": "When the machine was installed in ISO 8601 format"
+    },
+    "modules": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Module" }
+    },
+    "stations": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/Station" }
+    },
+    "featureTypes": {
+      "type": "array",
+      "description": "List of features that the equipment is capable of preforming work on",
+      "items": { "$ref": "#/definitions/FeatureType" }
+    },
+    "assets": {
+      "type": "array",
+      "description": "List of Assets used to carry out the operations of the tasks",
+      "items": { "$ref": "#/definitions/Asset" }
+    },
+    "opTypes": {
+      "type": "array",
+      "description": "",
+      "items": { "$ref": "#/definitions/OpType" }
+    },
+    "controls": {
+      "type": "array",
+      "description": "",
+      "items": { "$ref": "#/definitions/Control" }
+    }
+  },
+  "additionalProperties": false,
+  "required": ["machineId", "description", "featureTypes", "assets"],
+
+  "definitions": {
+    "Module": {
+      "type": "object",
+      "properties": {
+        "moduleId": {
+          "type": "string",
+          "description": "Id GH script/module",
+          "maxLength": 48
+        },
+        "moduleName": {
+          "type": "string",
+          "description": "Name of the GH script/module",
+          "maxLength": 48
+        },
+        "moduleType": {
+          "type": "string",
+          "description": "path and/or filename of the module (non-GH modules are relative to the programdata)",
+          "maxLength": 48,
+          "enum": ["ghmodule", "pathgen", "simulator"]
+        },
+        "location": {
+          "type": "string",
+          "description": "Filepath or other locator for the GH script/module",
+          "maxLength": 1024
+        },
+        "inputs": {
+          "type": "array",
+          "description": "List of Inputs required to complete the feature type",
+          "items": { "$ref": "#/definitions/ModuleInput" }
+        },
+        "outputs": {
+          "type": "array",
+          "description": "List of Outputs required to complete the feature type",
+          "items": { "$ref": "#/definitions/ModuleOutput" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["moduleId", "moduleName", "moduleType", "location"]
+    },
+
+    "ModuleInput": {
+      "type": "object",
+      "properties": {
+        "input": {
+          "type": "string",
+          "description": "Input type"
+        },
+        "source": {
+          "type": "string",
+          "description": "Meta data or serialized JSON data for the input",
+          "enum": ["predefined", "userrequest"]
+        },
+        "data": {
+          "type": "string",
+          "description": "Meta data or serialized JSON data for the input"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Text for a user prompt"
+        }
+      },
+      "required": ["input", "source"],
+      "additionalProperties": false
+    },
+
+    "ModuleOutput": {
+      "type": "object",
+      "properties": {
+        "output": {
+          "type": "string",
+          "description": "Output type"
+        },
+        "mapping": {
+          "type": "string",
+          "description": "Dot-notation path relative to the featureInstance key of the product config where the output data will be stored"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["append", "overwrite"],
+          "description": "How the output data will interact with the mapping.  Default: append"
+        },
+        "targetType": {
+          "type": "string",
+          "enum": ["point", "parameter"],
+          "description": "If the data is point or parameter"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "States whether this output is required to have the equipment continue.  Default: false",
+          "default": false
+        }
+      },
+      "required": ["output"],
+      "additionalProperties": false
+    },
+
+    "Station": {
+      "type": "object",
+      "properties": {
+        "stationId": {
+          "type": "string",
+          "description": "5 character length ID which is used to define the station",
+          "maxLength": 5
+        },
+        "description": {
+          "type": "string",
+          "description": "Describes the station and its main purpose",
+          "maxLength": 256
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "FeatureType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Legible Name of the Feature",
+          "maxLength": 16
+        },
+        "description": {
+          "type": "string",
+          "description": "Describes the feature",
+          "maxLength": 256
+        },
+        "typeId": {
+          "type": "string",
+          "description": "5 character length ID which is used to identify the feature",
+          "maxLength": 5
+        },
+        "refModuleIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "moduleIds of the any GH modules and scripts associated with this feature"
+        },
+        "curveReq": {
+          "type": "number",
+          "description": ""
+        },
+        "refStationId": {
+          "type": "string",
+          "description": "stationIds relateing to where along equipment this feature of work can be preformed",
+          "maxLength": 5
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "typeId", "refStationId"]
+    },
+
+    "Operation": {
+      "type": "object",
+      "properties": {
+        "opCode": {
+          "type": "number",
+          "description": "Unique Value representing the operation"
+        },
+        "refModuleId": {
+          "type": "string",
+          "description": "Reference to Module that executes this OpCode"
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "States whether this operation is required to have the equipment continue"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["opCode", "optional"]
+    },
+
+    "Asset": {
+      "type": "object",
+      "properties": {
+        "stationId": {
+          "type": "string",
+          "description": "All Assets must fall under a station ID",
+          "maxLength": 5
+        },
+        "assetId": {
+          "type": "string",
+          "description": "5 character length ID which is used to identify the Asset",
+          "maxLength": 5
+        },
+        "assetType": {
+          "type": "string",
+          "description": "One word description of the asset",
+          "maxLength": 32
+        },
+        "description": {
+          "type": "string",
+          "description": "Describes the asset",
+          "maxLength": 256
+        },
+        "components": {
+          "type": "array",
+          "description": "",
+          "items": { "$ref": "#/definitions/Component" }
+        },
+        "refOpType": {
+          "type": "string",
+          "description": "Reference to the name of the opType"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["stationId", "assetId", "assetType"]
+    },
+
+    "Component": {
+      "type": "object",
+      "properties": {
+        "compId": {
+          "type": "string",
+          "description": "5 character length ID which is used to identify the Component",
+          "maxLength": 5
+        },
+        "compType": {
+          "type": "string",
+          "description": "One word description of the component",
+          "maxLength": 32
+        },
+        "description": {
+          "type": "string",
+          "description": "One word description of the component",
+          "maxLength": 256
+        },
+        "controlId": {
+          "type": "string",
+          "description": "Reference to Control Device",
+          "maxLength": 5
+        },
+        "parameters": {
+          "type": "array",
+          "description": "",
+          "items": { "$ref": "#/definitions/Parameter" }
+        },
+        "subComponents": {
+          "type": "array",
+          "description": "",
+          "items": { "$ref": "#/definitions/SubComponent" }
+        },
+        "refOpType": {
+          "type": "string",
+          "description": "Reference to the name of the opType"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["compId", "compType", "controlId"]
+    },
+
+    "SubComponent": {
+      "type": "object",
+      "properties": {
+        "subCompId": {
+          "type": "string",
+          "description": "5 character length ID which is used to identify the subComponent",
+          "maxLength": 5
+        },
+        "subCompType": {
+          "type": "string",
+          "description": "One word description of the subComponent",
+          "maxLength": 32
+        },
+        "description": {
+          "type": "string",
+          "description": "One word description of the subcomponent",
+          "maxLength": 256
+        },
+        "controlId": {
+          "type": "string",
+          "description": "Reference to Control Device",
+          "maxLength": 5
+        },
+        "parameters": {
+          "type": "array",
+          "description": "",
+          "items": { "$ref": "#/definitions/Parameter" }
+        },
+        "refOpType": {
+          "type": "string",
+          "description": "Reference to the name of the opType"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["subCompId", "subCompType"]
+    },
+
+    "Parameter": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "A legible name to define a parameter \"Key\""
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the parameter defined as a string \"Value\""
+        },
+        "group": {
+          "type": "string",
+          "description": "String used for grouping parameters together in a UI or set.  Parameters with the same group value are grouped together."
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "value"]
+    },
+
+    "OpType": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "",
+          "maxLength": 32
+        },
+        "description": {
+          "type": "string",
+          "description": "",
+          "maxLength": 64
+        },
+        "opCode": {
+          "type": "integer",
+          "description": "opCode for this opType"
+        },
+        "prerequisites": {
+          "type": "array",
+          "description": "",
+          "items": { "type": "number" }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "opCode", "prerequisites"]
+    },
+
+    "Control": {
+      "type": "object",
+      "properties": {
+        "controlId": {
+          "type": "string",
+          "description": "5 character length ID which identifies the control device",
+          "maxLength": 5
+        },
+        "name": {
+          "type": "string",
+          "description": "Legible name to define a control point of the asset/component",
+          "maxLength": 16
+        },
+        "type": {
+          "type": "string",
+          "description": "One word describing the control point",
+          "maxLength": 32
+        },
+        "finite": {
+          "description": "A two position control device with can be commanded",
+          "$ref": "#/definitions/Finite"
+        }
+      },
+      "dynamic": {
+        "description": "",
+        "$ref": "#/definitions/Dynamic"
+      },
+      "additionalProperties": false,
+      "required": ["name, controlId", "type"]
+    },
+
+    "Finite": {
+      "type": "object",
+      "properties": {
+        "advance": {
+          "type": "string",
+          "description": "The control tag which extents the component",
+          "maxLength": 6
+        },
+        "retract": {
+          "type": "string",
+          "description": "The control tag which retracts the component",
+          "maxLength": 6
+        },
+        "feedback": {
+          "description": "The feedback for the control point",
+          "$ref": "#/definitions/FiniteFeedback"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["advance", "retract"]
+    },
+
+    "Dynamic": {
+      "type": "object",
+      "properties": {
+        "outputValue": {
+          "type": "string",
+          "description": "The control tag which the value of which the desired outcome is achieved",
+          "maxLength": 12
+        },
+        "outputRate": {
+          "type": "string",
+          "description": "The control tag which the rate of movement occurs at",
+          "maxLength": 12
+        },
+        "outputCmd": {
+          "type": "string",
+          "description": "The control tag which starts the exicution of the motion",
+          "maxLength": 12
+        },
+        "feedback": {
+          "description": "",
+          "$ref": "#/definitions/DynamicFeedback"
+        }
+      },
+      "additionalProperties": false,
+      "required": ["outputValue", "outputRate", "outputCmd"]
+    },
+
+    "FiniteFeedback": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Legible name to define the feedback of the control point",
+          "maxLength": 16
+        },
+        "type": {
+          "type": "string",
+          "description": "",
+          "maxLength": 32
+        },
+        "advanced": {
+          "type": "string",
+          "description": "",
+          "maxLength": 6
+        },
+        "retracted": {
+          "type": "string",
+          "description": "",
+          "maxLength": 6
+        }
+      },
+      "additionalProperties": false,
+      "required": ["advanced", "retracted"]
+    },
+
+    "DynamicFeedback": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": ""
+        },
+        "type": {
+          "type": "string",
+          "description": ""
+        },
+        "input": {
+          "type": "string",
+          "description": "The control tag which states the current position of the motion",
+          "maxLength": 6
+        }
+      },
+      "additionalProperties": false,
+      "required": ["input"]
+    }
+  }
+}

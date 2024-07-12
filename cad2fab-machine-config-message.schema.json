@@ -1,0 +1,16 @@
+{
+  "$id": "https://thinkbrave.com/cad2fab/schemas/v1/cad2fab-machine-config-message.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "CAD2FAB_Machine_Config_Message",
+  "type": "object",
+  "properties": {
+    "header": {
+      "$ref": "cad2fab-message-header.schema.json"
+    },
+    "machineConfig": {
+      "type": "object",
+      "$ref": "cad2fab-machine-config.schema.json"
+    }
+  },  
+  "required": ["header", "machineConfig"]
+}

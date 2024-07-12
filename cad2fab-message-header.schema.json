@@ -1,0 +1,25 @@
+{
+  "$id": "https://thinkbrave.com/cad2fab/schemas/v1/cad2fab-message-header.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "title": "CAD2FAB Message",
+  "type": "object",
+  "properties": {
+    "messageId": {
+      "type": "string",
+      "description": "Message Timestamp",
+      "maxLength": 5
+    },
+    "messageType": {
+      "type": "string",
+      "description": "Message Type Either Machine or Product",
+      "maxLength": 16,
+      "enum": ["Machine", "Product"]
+    },
+    "schemaVersion": {
+      "description": "Schema Version",
+      "type": "string",
+      "maxLength": 4
+    }
+  },
+  "required": ["messageId", "messageType", "schemaVersion"]
+}
